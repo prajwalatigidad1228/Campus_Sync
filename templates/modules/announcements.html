@@ -1,0 +1,154 @@
+{% extends "app_layout.html" %}
+{% block title %}Announcements{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Campus Announcements 📢</h1>
+      <p class="module-subtitle">Official circulars, departmental updates, and student coordinator notices.</p>
+    </div>
+    <button type="button" class="btn-primary" onclick="document.getElementById('announcement-modal').style.display='flex'">
+      + Create Notice
+    </button>
+  </div>
+
+  <!-- Tab Navigation (Exact Categories) -->
+  <div class="tabs-nav">
+    <button type="button" class="tab-btn active" data-tab="tab-management">🏛️ College Management</button>
+    <button type="button" class="tab-btn" data-tab="tab-teachers">👨‍🏫 Teachers</button>
+    <button type="button" class="tab-btn" data-tab="tab-coordinators">🎓 Student Coordinators</button>
+  </div>
+
+  <!-- Tab 1: College Management -->
+  <div class="tab-pane active" id="tab-management">
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% set mgmt_list = announcements|selectattr('category', 'equalto', 'College Management')|list %}
+      {% for ann in mgmt_list %}
+        <div class="content-card" style="margin-bottom: 0;">
+          <div class="card-title-bar">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge-pill badge-pill--green">Official Notice</span>
+              {% if ann.is_pinned %}<span class="badge-pill badge-pill--yellow">📌 Pinned</span>{% endif %}
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ ann.created_at.strftime('%d %b %Y') if ann.created_at else '' }}</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">{{ ann.author.display_name if ann.author else 'Management' }}</span>
+          </div>
+          <h3 class="card-heading" style="margin-bottom: 0.5rem;">{{ ann.title }}</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin: 0;">
+            {{ ann.content }}
+          </p>
+        </div>
+      {% else %}
+        <div class="content-card" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          No announcements in College Management category.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tab 2: Teachers -->
+  <div class="tab-pane" id="tab-teachers">
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% set teacher_list = announcements|selectattr('category', 'equalto', 'Teachers')|list %}
+      {% for ann in teacher_list %}
+        <div class="content-card" style="margin-bottom: 0;">
+          <div class="card-title-bar">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge-pill badge-pill--amber">Faculty Notice</span>
+              {% if ann.is_pinned %}<span class="badge-pill badge-pill--yellow">📌 Pinned</span>{% endif %}
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ ann.created_at.strftime('%d %b %Y') if ann.created_at else '' }}</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">{{ ann.author.display_name if ann.author else 'Faculty' }}</span>
+          </div>
+          <h3 class="card-heading" style="margin-bottom: 0.5rem;">{{ ann.title }}</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin: 0;">
+            {{ ann.content }}
+          </p>
+        </div>
+      {% else %}
+        <div class="content-card" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          No departmental faculty notices currently posted.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tab 3: Student Coordinators -->
+  <div class="tab-pane" id="tab-coordinators">
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% set coord_list = announcements|selectattr('category', 'equalto', 'Student Coordinators')|list %}
+      {% for ann in coord_list %}
+        <div class="content-card" style="margin-bottom: 0;">
+          <div class="card-title-bar">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge-pill badge-pill--blue">Student Council</span>
+              {% if ann.is_pinned %}<span class="badge-pill badge-pill--yellow">📌 Pinned</span>{% endif %}
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ ann.created_at.strftime('%d %b %Y') if ann.created_at else '' }}</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">{{ ann.author.display_name if ann.author else 'Coordinator' }}</span>
+          </div>
+          <h3 class="card-heading" style="margin-bottom: 0.5rem;">{{ ann.title }}</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin: 0;">
+            {{ ann.content }}
+          </p>
+        </div>
+      {% else %}
+        <div class="content-card" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          No student coordinator updates currently posted.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Create Announcement Modal -->
+  <div id="announcement-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="content-card" style="max-width: 600px; width: 100%;">
+      <div class="card-title-bar" style="margin-bottom: 1rem;">
+        <h3 class="card-heading">Publish Announcement 📢</h3>
+        <button type="button" onclick="document.getElementById('announcement-modal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+      <form action="{{ url_for('college_api.create_announcement') }}" method="POST">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Title</label>
+          <input type="text" name="title" class="input-field" placeholder="Headline / title..." required style="width: 100%;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Category</label>
+            <select name="category" class="input-field" style="width: 100%;">
+              <option value="College Management">College Management</option>
+              <option value="Teachers">Teachers</option>
+              <option value="Student Coordinators">Student Coordinators</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Target Audience</label>
+            <select name="target_role" class="input-field" style="width: 100%;">
+              <option value="all">Everyone</option>
+              <option value="student">Students Only</option>
+              <option value="teacher">Teachers Only</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Content</label>
+          <textarea name="content" rows="4" class="input-field" placeholder="Full notice announcement..." required style="width: 100%;"></textarea>
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; cursor: pointer;">
+            <input type="checkbox" name="is_pinned" value="1">
+            <span>Pin this announcement at top</span>
+          </label>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('announcement-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-primary">Publish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

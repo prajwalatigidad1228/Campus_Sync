@@ -1,0 +1,47 @@
+﻿{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar profile-avatar--teacher">{{ teacher.name[0] | upper }}</div>
+      <div>
+        <h1 class="profile-name">{{ teacher.name }}</h1>
+        <span class="student-id-badge">{{ teacher.teacher_id }}</span>
+        <span class="role-pill role-pill--teacher">Teacher</span>
+        <p class="profile-designation">{{ teacher.designation }}</p>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-section">
+        <h2>Contact Information</h2>
+        <dl class="info-grid">
+          <dt>Email</dt><dd>{{ teacher.email }}</dd>
+          <dt>Phone</dt><dd>{{ teacher.phone or '—' }}</dd>
+          <dt>Department</dt><dd>{{ teacher.department.name }}</dd>
+        </dl>
+      </div>
+      {% if teacher.subjects %}
+      <div class="profile-section">
+        <h2>Subjects</h2>
+        <ul class="subject-list">
+          {% for s in teacher.subjects %}
+          <li><strong>{{ s.code }}</strong> — {{ s.name }} (Sem {{ s.semester }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if teacher.bio %}
+      <div class="profile-section">
+        <h2>About</h2>
+        <p>{{ teacher.bio }}</p>
+      </div>
+      {% endif %}
+    </div>
+    <div class="profile-footer">
+      <a href="{{ url_for('dashboard.index') }}" class="btn">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

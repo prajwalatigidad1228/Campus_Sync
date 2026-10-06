@@ -1,0 +1,78 @@
+<!-- ── AI College Copilot Component (Reference Image 2) ──────────────── -->
+<section class="copilot-panel">
+
+  <!-- Header -->
+  <div class="copilot-header">
+    <div class="copilot-header-left">
+      <div class="copilot-avatar-box">
+        <span>🤖</span>
+      </div>
+      <div class="copilot-title-wrap">
+        <h2 class="copilot-title">
+          <span>AI College Copilot</span>
+          <span class="online-dot" title="Online & Ready"></span>
+        </h2>
+        <span class="copilot-subtitle">An intelligent assistant for institute-related information.</span>
+      </div>
+    </div>
+    <button type="button" class="clear-chat-btn">
+      Clear Chat
+    </button>
+  </div>
+
+  <!-- Messages Scroll Area -->
+  <div class="copilot-messages">
+    <div class="chat-bubble-row assistant">
+      <div class="chat-bubble-avatar">🤖</div>
+      <div class="chat-bubble-content">
+        <div class="chat-bubble">
+          Hello, <strong>{{ current_user.display_name }}</strong>! I am your <strong>AI College Copilot</strong>. You can ask me any question about your courses, timetable, attendance, exams, campus events, or institute regulations using your voice or typing below.
+        </div>
+        <span class="chat-timestamp">Just now</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Field & Action Buttons -->
+  <div class="copilot-input-area">
+    <div class="input-bar-wrap">
+      <div class="input-box">
+        <input 
+          type="text" 
+          class="chat-text-input" 
+          placeholder="Search campus or ask e.g. 'What is the attendance criteria?'"
+          autocomplete="off"
+        />
+        <button type="button" class="mic-btn" title="Click to use voice query">
+          🎙️
+        </button>
+      </div>
+      <button type="button" class="ask-btn">
+        <span>➤</span>
+        <span>Ask</span>
+      </button>
+    </div>
+
+    <!-- Suggestion Chips Row -->
+    <div class="chips-container">
+      <span class="chips-label">
+        <span>❓</span>
+        <span>TRY ASKING:</span>
+      </span>
+
+      {% if current_user.is_student %}
+        <button type="button" class="suggestion-chip">"What should I focus on today?"</button>
+        <button type="button" class="suggestion-chip">"What is the minimum attendance requirement?"</button>
+        <button type="button" class="suggestion-chip">"When do mid-semester exams begin?"</button>
+        <button type="button" class="suggestion-chip">"What is my attendance percentage?"</button>
+      {% else %}
+        <button type="button" class="suggestion-chip">"What should I focus on today?"</button>
+        <button type="button" class="suggestion-chip">"Show class attendance for CS301"</button>
+        <button type="button" class="suggestion-chip">"How to submit lecture replacement request?"</button>
+        <button type="button" class="suggestion-chip">"When is the internal marks entry deadline?"</button>
+      {% endif %}
+    </div>
+
+  </div>
+
+</section>

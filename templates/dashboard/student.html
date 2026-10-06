@@ -1,0 +1,174 @@
+{% extends "app_layout.html" %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block app_content %}
+
+  <!-- 1. AI College Copilot (Large Section at Top) -->
+  {% include "partials/copilot_card.html" %}
+
+  <!-- 2. Welcome Banner Row -->
+  <div class="welcome-header">
+    <div class="welcome-text-wrap">
+      <h1 class="welcome-title">
+        Welcome, {{ profile.name if profile else current_user.display_name }}! 👋
+      </h1>
+      <p class="welcome-subtitle">
+        {{ profile.department.name if profile and profile.department else 'Computer Science & Engineering' }}
+        &bull; Semester {{ profile.semester if profile else '5' }}
+        &bull; Division {{ profile.division if profile else 'A' }}
+        &bull; Roll No. {{ profile.roll_number if profile else 'CS-A-42' }}
+      </p>
+    </div>
+    <a href="{{ url_for('dashboard.copilot') }}" class="welcome-action-btn">
+      <span>✨</span>
+      <span>AI Copilot</span>
+    </a>
+  </div>
+
+  <!-- 3. Hero / Image Slider (3-Second Auto Rotation) -->
+  {% include "partials/slider.html" %}
+
+  <!-- 4. Four Main Student Action Cards Grid (Phase 4 Live Data) -->
+  <section class="cards-grid-4">
+
+    <!-- Card 1: Profile -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.profile') }}'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--mint">
+          <span>👤</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Profile</h3>
+          <span class="badge-pill badge-pill--green">{{ profile.student_id if profile else 'STU-001' }}</span>
+        </div>
+        <p class="action-card-desc">
+          Academic records, enrolled division ({{ profile.division if profile else 'A' }}), roll number ({{ profile.roll_number if profile else '42' }}), and contact details.
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>View Profile</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Attendance -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.academics') }}#tab-attendance'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--blue">
+          <span>📋</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Attendance</h3>
+          <span class="badge-pill {% if attendance_pct >= 75 %}badge-pill--green{% else %}badge-pill--yellow{% endif %}">
+            {{ attendance_pct }}%
+          </span>
+        </div>
+        <p class="action-card-desc">
+          Total Lectures: <strong>{{ total_lectures }}</strong> &bull; Attended: <strong>{{ present_lectures }}</strong> &bull; Absent: <strong>{{ absent_lectures }}</strong>.
+          {% if attendance_pct < 75 %}<span style="color: #ef4444; font-weight: 600;">Shortage alert!</span>{% else %}<span style="color: #10b981;">Good standing.</span>{% endif %}
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>Check Attendance</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Assignments -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.academics') }}#tab-assignments'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--amber">
+          <span>📝</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Assignments</h3>
+          <span class="badge-pill {% if pending_assignments_count > 0 %}badge-pill--yellow{% else %}badge-pill--green{% endif %}">
+            {{ pending_assignments_count }} Pending
+          </span>
+        </div>
+        <p class="action-card-desc">
+          {% if pending_assignments_count > 0 %}
+            You have <strong>{{ pending_assignments_count }}</strong> pending coursework submission{{ 's' if pending_assignments_count > 1 else '' }}.
+          {% else %}
+            All active coursework assignments are submitted and up to date!
+          {% endif %}
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>View Assignments</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Fees -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.exams') }}#tab-fees'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--purple">
+          <span>💳</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Fees</h3>
+          <span class="badge-pill {% if pending_fees_amount == 0 %}badge-pill--green{% else %}badge-pill--yellow{% endif %}">
+            {{ fees_status }}
+          </span>
+        </div>
+        <p class="action-card-desc">
+          {% if pending_fees_amount == 0 %}
+            All semester dues, lab charges, and exam registration fees cleared.
+          {% else %}
+            Semester dues remaining: <strong>${{ "%.2f"|format(pending_fees_amount) }}</strong>. Pay online before final deadline.
+          {% endif %}
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>Fee Structure</span>
+        <span>→</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 5. Things Requiring Your Attention (Phase 6 Smart Alerts) -->
+  <section class="alerts-section">
+    <div class="section-header-row">
+      <div class="section-title-wrap">
+        <span class="section-icon-badge">🔔</span>
+        <h2 class="section-heading">Things requiring your attention</h2>
+      </div>
+      {% if alerts and alerts|length > 0 %}
+        <span class="badge-pill badge-pill--yellow">{{ alerts|length }} Action Item{{ 's' if alerts|length != 1 else '' }}</span>
+      {% else %}
+        <span class="badge-pill badge-pill--green">All Caught Up</span>
+      {% endif %}
+    </div>
+
+    {% if alerts and alerts|length > 0 %}
+      <div class="alerts-grid">
+        {% for alert in alerts %}
+          <div class="alert-card alert-card--{{ alert.severity }}">
+            <div class="alert-card-left">
+              <span class="alert-icon">{{ alert.icon }}</span>
+              <div class="alert-content">
+                <h4 class="alert-title">{{ alert.title }}</h4>
+                <p class="alert-desc">{{ alert.description }}</p>
+              </div>
+            </div>
+            <a href="{{ alert.action_url }}" class="alert-action-btn alert-action-btn--{{ alert.severity }}">
+              {{ alert.action_label }} →
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert-empty-card">
+        <span class="empty-icon">🎉</span>
+        <div class="empty-text">
+          <h4>You're all caught up!</h4>
+          <p>No critical action items or deadlines requiring your immediate attention today.</p>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+{% endblock %}
+

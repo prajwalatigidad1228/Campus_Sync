@@ -1,0 +1,205 @@
+{% extends "app_layout.html" %}
+{% block title %}Feedback{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Campus Feedback & Suggestions 💬</h1>
+      <p class="module-subtitle">Direct, constructive feedback for academic curriculum, classroom teaching, and campus administration.</p>
+    </div>
+  </div>
+
+  {% if is_student %}
+    <!-- Student -> Teacher Feedback Form -->
+    <div class="content-card" style="margin-bottom: 1.5rem;">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Student &rarr; Teacher Course Evaluation</h3>
+        <span class="badge-pill badge-pill--green">Anonymous Optional</span>
+      </div>
+
+      <form action="{{ url_for('college_api.submit_feedback') }}" method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Instructor</label>
+            <select name="teacher_id" class="input-field" required style="width: 100%;">
+              <option value="">-- Select Faculty --</option>
+              {% for t in teachers %}
+                <option value="{{ t.id }}">{{ t.name }} ({{ t.department.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Subject</label>
+            <select name="subject_id" class="input-field" style="width: 100%;">
+              <option value="">-- Optional: Specific Subject --</option>
+              {% for s in subjects %}
+                <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Feedback Category</label>
+            <select name="category" class="input-field" style="width: 100%;">
+              <option value="Teaching Quality">Teaching Quality & Clarity</option>
+              <option value="Course Pacing">Course Pacing & Syllabus Coverage</option>
+              <option value="Lab Guidance">Practical & Lab Guidance</option>
+              <option value="Doubt Clearing">Doubt Clearing & Accessibility</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Rating (1 to 5 Stars)</label>
+            <select name="rating" class="input-field" style="width: 100%;">
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+              <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+              <option value="3">⭐⭐⭐ 3 - Good</option>
+              <option value="2">⭐⭐ 2 - Needs Improvement</option>
+              <option value="1">⭐ 1 - Unsatisfactory</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Constructive Comments & Suggestions</label>
+          <textarea name="comments" rows="3" class="input-field" placeholder="Provide constructive details on what went well or what can be improved..." required style="width: 100%;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+            <input type="checkbox" name="is_anonymous" value="1" checked>
+            <span>Submit anonymously (identity hidden from instructor)</span>
+          </label>
+          <button type="submit" class="btn-primary">Submit Course Evaluation</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Student Submitted History -->
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Your Past Submissions</h3>
+        <span class="badge-pill badge-pill--blue">{{ submitted_feedback|length }} Records</span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Instructor</th>
+              <th>Category</th>
+              <th>Rating</th>
+              <th>Feedback</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fb in submitted_feedback %}
+              <tr>
+                <td>{{ fb.created_at.strftime('%d %b %Y') if fb.created_at else '' }}</td>
+                <td>{{ fb.teacher.name if fb.teacher else 'Faculty' }}</td>
+                <td>{{ fb.category }}</td>
+                <td>{{ fb.rating }} / 5 ★</td>
+                <td>{{ fb.comments }}</td>
+                <td><span class="badge-pill badge-pill--green">{{ fb.status }}</span></td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">You haven't submitted any course evaluations yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  {% else %}
+    <!-- Teacher -> Management Feedback Form -->
+    <div class="content-card" style="margin-bottom: 1.5rem;">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Teacher &rarr; College Management Consultation</h3>
+        <span class="badge-pill badge-pill--blue">Faculty Governance</span>
+      </div>
+
+      <form action="{{ url_for('college_api.submit_feedback') }}" method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Governance Category</label>
+            <select name="category" class="input-field" style="width: 100%;">
+              <option value="Classroom & Lab Infrastructure">Classroom & Lab Infrastructure</option>
+              <option value="Curriculum & Syllabus Revisions">Curriculum & Syllabus Revisions</option>
+              <option value="Academic Scheduling & Timetable">Academic Scheduling & Timetable</option>
+              <option value="Administrative Support & IT Facilities">Administrative Support & IT Facilities</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Priority / Rating</label>
+            <select name="rating" class="input-field" style="width: 100%;">
+              <option value="5">5 - Critical / Priority Concern</option>
+              <option value="4">4 - High Importance</option>
+              <option value="3" selected>3 - General Recommendation</option>
+              <option value="2">2 - Minor Suggestion</option>
+              <option value="1">1 - Informational</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Proposal / Feedback Summary</label>
+          <textarea name="comments" rows="3" class="input-field" placeholder="Provide actionable recommendation for college management and academic council..." required style="width: 100%;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn-primary">Submit to Management</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Student Feedback Received by this Teacher -->
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Student Course Evaluations Received</h3>
+        <span class="badge-pill badge-pill--green">{{ received_feedback|length }} Evaluations</span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Category</th>
+              <th>Rating</th>
+              <th>Comments</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fb in received_feedback %}
+              <tr>
+                <td>{{ fb.created_at.strftime('%d %b %Y') if fb.created_at else '' }}</td>
+                <td>
+                  {% if fb.is_anonymous %}
+                    <span class="badge-pill badge-pill--blue">Anonymous Student</span>
+                  {% else %}
+                    <strong>{{ fb.student.name if fb.student else 'Student' }}</strong>
+                  {% endif %}
+                </td>
+                <td>{{ fb.category }}</td>
+                <td>{{ fb.rating }} / 5 ★</td>
+                <td>{{ fb.comments }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No student evaluations received yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

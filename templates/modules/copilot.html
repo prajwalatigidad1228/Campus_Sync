@@ -1,0 +1,39 @@
+{% extends "app_layout.html" %}
+{% block title %}AI College Copilot{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">AI College Copilot 🤖</h1>
+      <p class="module-subtitle">Intelligent conversational assistant for institute regulations, academics, and services.</p>
+    </div>
+    <span class="badge-pill badge-pill--green">● System Active</span>
+  </div>
+
+  <!-- Large Copilot Component -->
+  {% include "partials/copilot_card.html" %}
+
+  <!-- Quick Topic Knowledge Cards -->
+  <div class="cards-grid-4" style="margin-top: 1rem;">
+    <div class="content-card" style="padding: 1.25rem;">
+      <h4 style="font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">📋 Attendance Policies</h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Minimum 75% rule, medical condonation submission deadlines, and shortage notices.</p>
+    </div>
+    <div class="content-card" style="padding: 1.25rem;">
+      <h4 style="font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">📅 Exam Regulations</h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Hall ticket validation, invigilation guidelines, and grade grievance timelines.</p>
+    </div>
+    <div class="content-card" style="padding: 1.25rem;">
+      <h4 style="font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">💳 Fee Remittance</h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Online fee challans, scholarship concessions, and library clearance rules.</p>
+    </div>
+    <div class="content-card" style="padding: 1.25rem;">
+      <h4 style="font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">🏛️ Campus Services</h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Central library hours, hostel council procedures, and lab reservation policies.</p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

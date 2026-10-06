@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  {% include "partials/sidebar.html" %}
+
+  <!-- Main View Area -->
+  <main class="app-main">
+
+    <!-- Mobile Header -->
+    {% include "partials/header.html" %}
+
+    <!-- Flash Messages Container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Dynamic App Content -->
+    {% block app_content %}{% endblock %}
+
+  </main>
+
+</div>
+{% endblock %}

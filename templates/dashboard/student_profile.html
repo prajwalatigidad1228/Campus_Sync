@@ -1,0 +1,45 @@
+﻿{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar">{{ student.name[0] | upper }}</div>
+      <div>
+        <h1 class="profile-name">{{ student.name }}</h1>
+        <span class="student-id-badge">{{ student.student_id }}</span>
+        <span class="role-pill role-pill--student">Student</span>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-section">
+        <h2>Contact Information</h2>
+        <dl class="info-grid">
+          <dt>Email</dt><dd>{{ student.email }}</dd>
+          <dt>Phone</dt><dd>{{ student.phone or '—' }}</dd>
+          <dt>Address</dt><dd>{{ student.address or '—' }}</dd>
+        </dl>
+      </div>
+      <div class="profile-section">
+        <h2>Academic Information</h2>
+        <dl class="info-grid">
+          <dt>Department</dt><dd>{{ student.department.name }}</dd>
+          <dt>Semester</dt><dd>{{ student.semester }}</dd>
+          <dt>Division</dt><dd>{{ student.division or '—' }}</dd>
+          <dt>Roll Number</dt><dd>{{ student.roll_number or '—' }}</dd>
+        </dl>
+      </div>
+      {% if student.bio %}
+      <div class="profile-section">
+        <h2>About</h2>
+        <p>{{ student.bio }}</p>
+      </div>
+      {% endif %}
+    </div>
+    <div class="profile-footer">
+      <a href="{{ url_for('dashboard.index') }}" class="btn">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

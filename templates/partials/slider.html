@@ -1,0 +1,166 @@
+<!-- ── Hero Slider Component (Reference Image 1) ─────────────────────── -->
+<div class="hero-slider-wrap">
+  <div class="slider-track">
+
+    {% if current_user.is_student %}
+      <!-- Slide 1: Student Academics -->
+      <div class="slider-slide active" data-index="0">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>🎓</span>
+            <span>ACADEMIC EXCELLENCE</span>
+          </div>
+          <h2 class="slide-title">Empowering Your Academic Journey</h2>
+          <p class="slide-desc">
+            Access real-time lecture attendance, course syllabus outcomes, credit status, and assignment schedules with one click.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>✔</span> 75%+ Criteria</span>
+            <span class="slide-chip"><span>📚</span> Continuous Evaluation</span>
+            <span class="slide-chip"><span>⚡</span> Instant Copilot</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">🎓</div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Student Exams -->
+      <div class="slider-slide" data-index="1">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>📝</span>
+            <span>EXAMINATION PORTAL</span>
+          </div>
+          <h2 class="slide-title">Mid-Semester Exam Schedules Live</h2>
+          <p class="slide-desc">
+            Download your examination timetable, review internal marks breakdown, and verify semester registration status seamlessly.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>📅</span> Hall Tickets</span>
+            <span class="slide-chip"><span>📊</span> GPA Analytics</span>
+            <span class="slide-chip"><span>🏛️</span> Hall Allocations</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">📝</div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Student Career & Campus -->
+      <div class="slider-slide" data-index="2">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>🚀</span>
+            <span>CAMPUS INNOVATION</span>
+          </div>
+          <h2 class="slide-title">Industry Placements & Projects</h2>
+          <p class="slide-desc">
+            Explore active internships, hackathons, and departmental announcements from student coordinators across all divisions.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>💼</span> Training & Placements</span>
+            <span class="slide-chip"><span>🏆</span> Hackathons</span>
+            <span class="slide-chip"><span>🌐</span> Innovation Lab</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">🚀</div>
+        </div>
+      </div>
+
+    {% else %}
+      <!-- Slide 1: Teacher Curriculum -->
+      <div class="slider-slide active" data-index="0">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>📚</span>
+            <span>FACULTY WORKSPACE</span>
+          </div>
+          <h2 class="slide-title">Curriculum Delivery & Syllabus Milestones</h2>
+          <p class="slide-desc">
+            Track lecture progress against weekly targets, record division attendance, and manage continuous evaluation metrics.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>✔</span> Syllabus Tracker</span>
+            <span class="slide-chip"><span>👥</span> Batch Attendance</span>
+            <span class="slide-chip"><span>🎯</span> Target Hours</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">📚</div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Teacher Assessment -->
+      <div class="slider-slide" data-index="1">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>✍️</span>
+            <span>ASSESSMENT & EVALUATION</span>
+          </div>
+          <h2 class="slide-title">Midterm Paper Checking & Grading Window</h2>
+          <p class="slide-desc">
+            The internal assessment marks entry portal is open. Verify rubric scores and submit departmental grades before the cutoff.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>📊</span> Grade Entry</span>
+            <span class="slide-chip"><span>🔍</span> Moderation Check</span>
+            <span class="slide-chip"><span>⚡</span> Audit Trails</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">✍️</div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Teacher Lecture Replacement -->
+      <div class="slider-slide" data-index="2">
+        <div class="slide-content-left">
+          <div class="slide-tag">
+            <span>🔄</span>
+            <span>FACULTY COORDINATION</span>
+          </div>
+          <h2 class="slide-title">Lecture Replacement & Session Adjustment</h2>
+          <p class="slide-desc">
+            Request colleague substitutions with automated schedule notifications, room confirmations, and HoD approval tracking.
+          </p>
+          <div class="slide-chips">
+            <span class="slide-chip"><span>🤝</span> Peer Substitute</span>
+            <span class="slide-chip"><span>🔔</span> Instant Notification</span>
+            <span class="slide-chip"><span>📋</span> HoD Approval</span>
+          </div>
+        </div>
+        <div class="slide-graphic-right">
+          <div class="graphic-ring graphic-ring-3"></div>
+          <div class="graphic-ring graphic-ring-2"></div>
+          <div class="graphic-ring graphic-ring-1"></div>
+          <div class="graphic-center-icon">🔄</div>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Pagination Dots -->
+  <div class="slider-dots">
+    <div class="slider-dot active" data-slide="0"></div>
+    <div class="slider-dot" data-slide="1"></div>
+    <div class="slider-dot" data-slide="2"></div>
+  </div>
+</div>

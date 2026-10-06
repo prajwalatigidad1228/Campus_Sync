@@ -1,0 +1,242 @@
+{% extends "app_layout.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block app_content %}
+
+  <!-- 1. AI College Copilot (Large Section at Top) -->
+  {% include "partials/copilot_card.html" %}
+
+  <!-- 2. Welcome Banner Row -->
+  <div class="welcome-header">
+    <div class="welcome-text-wrap">
+      <h1 class="welcome-title">
+        Welcome, {{ profile.name if profile else current_user.display_name }}! 👋
+      </h1>
+      <p class="welcome-subtitle">
+        {{ profile.designation if profile else 'Associate Professor' }}
+        &bull; {{ profile.department.name if profile and profile.department else 'Computer Science & Engineering' }}
+        &bull; Faculty ID: {{ profile.teacher_id if profile else 'TCH-2024-001' }}
+      </p>
+    </div>
+    <a href="{{ url_for('dashboard.copilot') }}" class="welcome-action-btn">
+      <span>✨</span>
+      <span>AI Copilot</span>
+    </a>
+  </div>
+
+  <!-- 3. Hero / Image Slider (3-Second Auto Rotation) -->
+  {% include "partials/slider.html" %}
+
+  <!-- 4. Four Main Teacher Action Cards Grid (Phase 4 Live Data) -->
+  <section class="cards-grid-4">
+
+    <!-- Card 1: Profile -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.profile') }}'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--mint">
+          <span>👤</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Profile</h3>
+          <span class="badge-pill badge-pill--green">{{ profile.teacher_id if profile else 'TCH-001' }}</span>
+        </div>
+        <p class="action-card-desc">
+          Managing <strong>{{ profile.subjects|length if profile else 2 }}</strong> subjects in {{ profile.department.code if profile and profile.department else 'CS' }}. Contact and faculty qualifications.
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>View Profile</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Target -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.academics') }}#tab-targets'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--blue">
+          <span>🎯</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Target</h3>
+          <span class="badge-pill badge-pill--green">{{ overall_target }}% Delivered</span>
+        </div>
+        <p class="action-card-desc">
+          Monitoring <strong>{{ targets|length }}</strong> weekly delivery target{{ 's' if targets|length != 1 else '' }}. Track syllabus progress and hours logged.
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>Manage Targets</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Checking -->
+    <div class="action-card" onclick="window.location.href='{{ url_for('dashboard.academics') }}#tab-grading'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--amber">
+          <span>📑</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Checking</h3>
+          <span class="badge-pill {% if pending_checking_count > 0 %}badge-pill--yellow{% else %}badge-pill--green{% endif %}">
+            {{ pending_checking_count }} Pending
+          </span>
+        </div>
+        <p class="action-card-desc">
+          {% if pending_checking_count > 0 %}
+            You have <strong>{{ pending_checking_count }}</strong> student assignment submission{{ 's' if pending_checking_count > 1 else '' }} awaiting assessment.
+          {% else %}
+            All student submissions are graded and feedback is recorded!
+          {% endif %}
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>Check Papers</span>
+        <span>→</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Lecture Replacement Request -->
+    <div class="action-card" onclick="document.getElementById('replacement-modal').style.display='flex'">
+      <div class="card-top">
+        <div class="card-icon-box icon-box--purple">
+          <span>🔄</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <h3 class="action-card-title">Lecture Replacement</h3>
+          <span class="badge-pill {% if pending_replacements_count > 0 %}badge-pill--yellow{% else %}badge-pill--green{% endif %}">
+            {{ pending_replacements_count }} Incoming
+          </span>
+        </div>
+        <p class="action-card-desc">
+          Coordinate class substitution requests with departmental colleagues when on leave or attending conferences.
+        </p>
+      </div>
+      <div class="card-bottom-link">
+        <span>Create / Review Swap</span>
+        <span>→</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 5. Things Requiring Your Attention (Phase 6 Smart Alerts) -->
+  <section class="alerts-section">
+    <div class="section-header-row">
+      <div class="section-title-wrap">
+        <span class="section-icon-badge">🔔</span>
+        <h2 class="section-heading">Things requiring your attention</h2>
+      </div>
+      {% if alerts and alerts|length > 0 %}
+        <span class="badge-pill badge-pill--yellow">{{ alerts|length }} Action Item{{ 's' if alerts|length != 1 else '' }}</span>
+      {% else %}
+        <span class="badge-pill badge-pill--green">All Caught Up</span>
+      {% endif %}
+    </div>
+
+    {% if alerts and alerts|length > 0 %}
+      <div class="alerts-grid">
+        {% for alert in alerts %}
+          <div class="alert-card alert-card--{{ alert.severity }}">
+            <div class="alert-card-left">
+              <span class="alert-icon">{{ alert.icon }}</span>
+              <div class="alert-content">
+                <h4 class="alert-title">{{ alert.title }}</h4>
+                <p class="alert-desc">{{ alert.description }}</p>
+              </div>
+            </div>
+            <a href="{{ alert.action_url }}" class="alert-action-btn alert-action-btn--{{ alert.severity }}">
+              {{ alert.action_label }} →
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert-empty-card">
+        <span class="empty-icon">🎉</span>
+        <div class="empty-text">
+          <h4>You're all caught up!</h4>
+          <p>No pending submissions, low-attendance notices, or substitution requests requiring immediate action.</p>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+
+  <!-- Lecture Replacement Modal / Section -->
+  <div id="replacement-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="content-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div class="card-title-bar" style="margin-bottom: 1.25rem;">
+        <h3 class="card-heading">Lecture Replacement Coordination 🔄</h3>
+        <button type="button" onclick="document.getElementById('replacement-modal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+
+      <!-- Pending Incoming Requests -->
+      {% if incoming_replacements %}
+        <div style="margin-bottom: 1.5rem; background: var(--bg-accent-subtle); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Incoming Substitution Requests:</h4>
+          {% for req in incoming_replacements %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+              <div>
+                <p style="font-weight: 600; font-size: 0.88rem; margin: 0;">{{ req.requester.name }} &bull; {{ req.subject.code }}</p>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">Date: {{ req.date }} &bull; {{ req.time_slot }} &bull; Reason: {{ req.reason }}</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <form action="{{ url_for('college_api.respond_replacement_request', request_id=req.id) }}" method="POST" style="margin: 0;">
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: #10b981;">Accept</button>
+                </form>
+                <form action="{{ url_for('college_api.respond_replacement_request', request_id=req.id) }}" method="POST" style="margin: 0;">
+                  <input type="hidden" name="action" value="reject">
+                  <button type="submit" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; color: #ef4444;">Decline</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Create New Request Form -->
+      <form action="{{ url_for('college_api.create_replacement_request') }}" method="POST">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.75rem;">Request Lecture Coverage</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Subject</label>
+            <select name="subject_id" class="input-field" required style="width: 100%;">
+              {% for s in profile.subjects %}
+                <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Colleague Faculty</label>
+            <select name="substitute_id" class="input-field" required style="width: 100%;">
+              {% for c in colleagues %}
+                <option value="{{ c.id }}">{{ c.name }} ({{ c.teacher_id }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Date</label>
+            <input type="date" name="date" class="input-field" required style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Time Slot</label>
+            <input type="text" name="time_slot" placeholder="e.g. 10:00 AM - 11:00 AM" class="input-field" required style="width: 100%;">
+          </div>
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Reason for Absence</label>
+          <textarea name="reason" rows="2" class="input-field" placeholder="Academic symposium, medical leave, or faculty meeting..." required style="width: 100%;"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('replacement-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn-primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

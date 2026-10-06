@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <!-- Brand -->
+    <div class="auth-brand">
+      <span class="brand-icon-lg">🎓</span>
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Sign in to your CampusSync account</p>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Login form -->
+    <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" novalidate>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email address</label>
+        <input
+          class="form-input"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="you@college.edu"
+          autocomplete="email"
+          required
+          value="{{ request.form.get('email', '') }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="pw-toggle" onclick="togglePassword()" title="Show/hide password">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="checkbox-label">
+          <input type="checkbox" name="remember" value="1" />
+          <span>Remember me for 7 days</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-full">Sign in</button>
+
+    </form>
+
+    <!-- Dev credentials hint (visible only in development) -->
+    <div class="dev-hint">
+      <p class="dev-hint-title">🛠 Development credentials</p>
+      <div class="dev-cred-grid">
+        <div class="dev-cred-card" onclick="fillCred('student@test.com','Student@123')">
+          <span class="role-pill role-pill--student">Student</span>
+          <code>student@test.com</code>
+          <code>Student@123</code>
+          <small>Click to fill</small>
+        </div>
+        <div class="dev-cred-card" onclick="fillCred('teacher@test.com','Teacher@123')">
+          <span class="role-pill role-pill--teacher">Teacher</span>
+          <code>teacher@test.com</code>
+          <code>Teacher@123</code>
+          <small>Click to fill</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword() {
+  const pw = document.getElementById("password");
+  pw.type = pw.type === "password" ? "text" : "password";
+}
+function fillCred(email, pass) {
+  document.getElementById("email").value = email;
+  document.getElementById("password").value = pass;
+}
+</script>
+{% endblock %}

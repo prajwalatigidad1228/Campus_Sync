@@ -1,0 +1,103 @@
+<!-- ── Sidebar Component (Reference Image 1) ────────────────────────── -->
+<aside class="app-sidebar">
+
+  <!-- Brand Logo & Name -->
+  <div class="sidebar-brand">
+    <div class="brand-icon-box">
+      <span>🎓</span>
+    </div>
+    <div class="brand-info">
+      <span class="brand-title">CampusSync</span>
+      <span class="brand-subtitle">College AI Copilot</span>
+    </div>
+  </div>
+
+  <!-- Primary Navigation Menu (Exact Order Required) -->
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('dashboard.index') }}" 
+       class="nav-item {% if request.path in ['/dashboard', '/student', '/teacher'] %}active{% endif %}">
+      <span class="nav-item-icon">⊞</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="{{ url_for('dashboard.copilot') }}" 
+       class="nav-item {% if request.path == '/copilot' %}active{% endif %}">
+      <span class="nav-item-icon">✨</span>
+      <span>AI Copilot</span>
+    </a>
+
+    <a href="{{ url_for('dashboard.announcements') }}" 
+       class="nav-item {% if request.path == '/announcements' %}active{% endif %}">
+      <span class="nav-item-icon">📢</span>
+      <span>Announcements</span>
+    </a>
+
+    <a href="{{ url_for('dashboard.academics') }}" 
+       class="nav-item {% if request.path == '/academics' %}active{% endif %}">
+      <span class="nav-item-icon">📚</span>
+      <span>Academics</span>
+    </a>
+
+    <a href="{{ url_for('dashboard.exams') }}" 
+       class="nav-item {% if request.path == '/exams' %}active{% endif %}">
+      <span class="nav-item-icon">📝</span>
+      <span>Exam Portal</span>
+    </a>
+
+    <a href="{{ url_for('dashboard.feedback') }}" 
+       class="nav-item {% if request.path == '/feedback' %}active{% endif %}">
+      <span class="nav-item-icon">💬</span>
+      <span>Feedback</span>
+    </a>
+  </nav>
+
+  <!-- Sidebar Bottom Section -->
+  <div class="sidebar-footer">
+    
+    <!-- Settings -->
+    <a href="{{ url_for('dashboard.settings') }}" 
+       class="nav-item {% if request.path == '/settings' %}active{% endif %}" 
+       style="padding: 0.6rem 0.85rem; margin-bottom: 0.2rem;">
+      <span class="nav-item-icon">⚙️</span>
+      <span>Settings</span>
+    </a>
+
+    <!-- Appearance: Dark / Light Mode Toggle -->
+    <div class="appearance-row">
+      <span class="appearance-label">Appearance</span>
+      <button type="button" class="theme-toggle-btn" aria-label="Toggle theme">
+        🌙
+      </button>
+    </div>
+
+    <!-- Current User Profile Card -->
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('dashboard.profile') }}" class="user-sidebar-card" title="View Profile">
+      <div class="user-avatar-badge {% if current_user.is_teacher %}teacher{% endif %}">
+        {{ current_user.display_name[0] | upper }}
+      </div>
+      <div class="user-sidebar-details">
+        <span class="user-sidebar-name">{{ current_user.display_name }}</span>
+        <span class="user-sidebar-sub">
+          {% if current_user.is_student %}
+            {{ current_user.student_profile.student_id if current_user.student_profile else current_user.email }}
+          {% else %}
+            {{ current_user.teacher_profile.designation if current_user.teacher_profile else 'Faculty' }}
+          {% endif %}
+        </span>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Logout -->
+    <a href="{{ url_for('auth.logout') }}" class="sidebar-signout">
+      <span>↳</span>
+      <span>Sign Out</span>
+    </a>
+
+  </div>
+
+</aside>
+
+<!-- Backdrop overlay for mobile screen drawer -->
+<div class="sidebar-backdrop"></div>

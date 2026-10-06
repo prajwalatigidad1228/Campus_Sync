@@ -1,0 +1,53 @@
+{% extends "app_layout.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Settings & Preferences ⚙️</h1>
+      <p class="module-subtitle">Customize theme appearance, notification channels, and account security.</p>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <h3 class="card-heading" style="margin-bottom: 1.25rem;">Interface Theme</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <button type="button" class="btn-primary theme-toggle-btn" style="background-color: var(--primary);">
+        Toggle Light / Dark Mode
+      </button>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <h3 class="card-heading" style="margin-bottom: 1.25rem;">Notification Preferences</h3>
+    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+      <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+        <input type="checkbox" checked style="accent-color: var(--primary); width: 18px; height: 18px;" />
+        <span style="font-weight: 500;">Email notifications for newly posted official circulars</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+        <input type="checkbox" checked style="accent-color: var(--primary); width: 18px; height: 18px;" />
+        <span style="font-weight: 500;">SMS alerts for exam hall ticket releases and timetable changes</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+        <input type="checkbox" checked style="accent-color: var(--primary); width: 18px; height: 18px;" />
+        <span style="font-weight: 500;">AI Copilot proactive reminder prompts before assignment deadlines</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <h3 class="card-heading" style="margin-bottom: 1.25rem;">Security</h3>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <p style="font-weight: 600; color: var(--text-main);">Password Protection</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Last password updated recently. Passwords are encrypted with bcrypt.</p>
+      </div>
+      <button type="button" class="btn-primary" onclick="alert('Password update dialog will open in next phase.');">Change Password</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Welcome to <span class="accent">Campus<em>Sync</em></span></h1>
+    <p class="hero-subtitle">
+      A modern College Management &amp; AI Copilot platform &mdash;
+      built to streamline academics, administration, and student life.
+    </p>
+    <div class="hero-badges">
+      <span class="badge badge-green">🟢 System Online</span>
+      <a href="/api/health" class="badge badge-blue" target="_blank">API Health →</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>What's Coming</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <h3>Role-Based Auth</h3>
+      <p>Admin, Faculty, and Student portals with secure JWT auth.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📚</div>
+      <h3>Academics</h3>
+      <p>Course management, attendance, grades, and timetables.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI Copilot</h3>
+      <p>RAG-powered assistant for students and faculty.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📢</div>
+      <h3>Announcements</h3>
+      <p>College-wide notices, events, and exam schedules.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Dashboards</h3>
+      <p>Rich analytics dashboards for every role.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📁</div>
+      <h3>File Uploads</h3>
+      <p>Submit assignments and study materials securely.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

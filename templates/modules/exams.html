@@ -1,0 +1,186 @@
+{% extends "app_layout.html" %}
+{% block title %}Exam Portal{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Examination & Evaluation Portal 📝</h1>
+      <p class="module-subtitle">Semester examination schedules, institutional fee structures, and published result scorecards.</p>
+    </div>
+  </div>
+
+  <!-- Tab Navigation (Exact Subsections: Exam Timetable, Fee Structure, Results) -->
+  <div class="tabs-nav">
+    <button type="button" class="tab-btn active" data-tab="tab-timetable">📅 Exam Timetable</button>
+    <button type="button" class="tab-btn" data-tab="tab-fees">💳 Fee Structure</button>
+    <button type="button" class="tab-btn" data-tab="tab-results">📊 Results</button>
+  </div>
+
+  <!-- Tab 1: Exam Timetable -->
+  <div class="tab-pane active" id="tab-timetable">
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Semester Examination Schedule</h3>
+        <span class="badge-pill badge-pill--blue">Hall Ticket Required</span>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Course Code</th>
+              <th>Course Title</th>
+              <th>Exam Name</th>
+              <th>Venue / Room</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in timetables %}
+              <tr>
+                <td><strong>{{ item.exam_date.strftime('%d %b %Y') if item.exam_date else '' }}</strong></td>
+                <td>{{ item.start_time }} – {{ item.end_time }}</td>
+                <td><strong>{{ item.subject.code }}</strong></td>
+                <td>{{ item.subject.name }}</td>
+                <td>{{ item.exam_name }}</td>
+                <td><span class="badge-pill badge-pill--mint">{{ item.room_number }}</span></td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No upcoming exam timetables scheduled.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Fee Structure -->
+  <div class="tab-pane" id="tab-fees">
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Semester Academic & Examination Fee Breakdown</h3>
+        <span class="badge-pill badge-pill--green">Academic Dues</span>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fee Description</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Action / Receipt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in fees %}
+              <tr>
+                <td><strong>{{ f.title }}</strong></td>
+                <td>{{ f.fee_type }}</td>
+                <td><strong>${{ "%.2f"|format(f.amount) }}</strong></td>
+                <td>{{ f.due_date.strftime('%d %b %Y') if f.due_date else 'Immediate' }}</td>
+                <td>
+                  <span class="badge-pill {% if f.status == 'Paid' %}badge-pill--green{% elif f.status == 'Pending' %}badge-pill--yellow{% else %}badge-pill--red{% endif %}">
+                    {{ f.status }}
+                  </span>
+                </td>
+                <td>
+                  {% if f.status == 'Paid' %}
+                    <span style="font-size: 0.8rem; font-family: monospace; font-weight: 700; color: #10b981;">
+                      {{ f.receipt_number or 'REC-VERIFIED' }}
+                    </span>
+                  {% else %}
+                    <form action="{{ url_for('college_api.pay_fee', fee_id=f.id) }}" method="POST" style="margin: 0;">
+                      <button type="submit" class="btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+                        Pay Online →
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No fee invoice records found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Results -->
+  <div class="tab-pane" id="tab-results">
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Published Academic Scorecards & Performance</h3>
+        {% if is_student %}
+          <span class="badge-pill badge-pill--purple">SGPA: {{ sgpa }} / 10.0</span>
+        {% endif %}
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              {% if not is_student %}<th>Student</th>{% endif %}
+              <th>Subject</th>
+              <th>Exam Name</th>
+              <th>Internal</th>
+              <th>External</th>
+              <th>Total Score</th>
+              <th>Grade</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in results %}
+              <tr>
+                {% if not is_student %}
+                  <td><strong>{{ r.student.name }}</strong> ({{ r.student.roll_number }})</td>
+                {% endif %}
+                <td><strong>{{ r.subject.code }}</strong> – {{ r.subject.name }}</td>
+                <td>{{ r.exam_name }}</td>
+                <td>{{ r.internal_marks }}</td>
+                <td>{{ r.external_marks }}</td>
+                <td><strong>{{ r.total_marks }} / {{ r.max_marks }}</strong></td>
+                <td><span class="badge-pill badge-pill--green" style="font-weight: 800;">{{ r.grade }}</span></td>
+                <td>
+                  <span class="badge-pill {% if r.status == 'Pass' %}badge-pill--green{% else %}badge-pill--yellow{% endif %}">
+                    {{ r.status }}
+                  </span>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No examination results published yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Hash-based tab switching script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash) {
+      var hashTab = window.location.hash.substring(1);
+      var btn = document.querySelector('.tab-btn[data-tab="' + hashTab + '"]');
+      if (btn) {
+        btn.click();
+      }
+    }
+  });
+</script>
+{% endblock %}

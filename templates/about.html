@@ -1,0 +1,21 @@
+﻿{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <h1>About Campus_Sync</h1>
+  <p>
+    Campus_Sync is a full-stack college management platform with an integrated AI Copilot.
+    Built with Flask, SQLAlchemy, and PostgreSQL, it is designed to be modular, scalable,
+    and hackathon-friendly.
+  </p>
+  <h2>Architecture</h2>
+  <ul>
+    <li><strong>Backend:</strong> Flask (Python) with application factory pattern</li>
+    <li><strong>ORM:</strong> SQLAlchemy + Flask-Migrate</li>
+    <li><strong>Database:</strong> PostgreSQL (production) / SQLite (development)</li>
+    <li><strong>Frontend:</strong> Jinja2 templates + vanilla JS</li>
+    <li><strong>Config:</strong> python-dotenv with multi-environment support</li>
+  </ul>
+</section>
+{% endblock %}

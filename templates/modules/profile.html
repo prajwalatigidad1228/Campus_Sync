@@ -1,0 +1,104 @@
+{% extends "app_layout.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Institutional Profile 👤</h1>
+      <p class="module-subtitle">Verified registration credentials, institutional standing, and departmental information.</p>
+    </div>
+    <span class="badge-pill {% if current_user.is_student %}badge-pill--blue{% else %}badge-pill--green{% endif %}">
+      {{ current_user.role.value | upper }} PORTAL
+    </span>
+  </div>
+
+  <div class="content-card">
+    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+      <div class="user-avatar-badge {% if current_user.is_teacher %}teacher{% endif %}" style="width: 72px; height: 72px; font-size: 2rem; border-radius: 20px;">
+        {{ current_user.display_name[0] | upper }}
+      </div>
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main);">{{ current_user.display_name }}</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          {% if current_user.is_student %}
+            Student ID: <strong>{{ current_user.student_profile.student_id if current_user.student_profile else 'STU-2024-001' }}</strong>
+          {% else %}
+            Faculty ID: <strong>{{ current_user.teacher_profile.teacher_id if current_user.teacher_profile else 'TCH-2024-001' }}</strong>
+          {% endif %}
+          &bull; {{ current_user.email }}
+        </p>
+      </div>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <tbody>
+          <tr>
+            <th style="width: 200px;">Full Legal Name</th>
+            <td>{{ current_user.display_name }}</td>
+          </tr>
+          <tr>
+            <th>Institutional Role</th>
+            <td><span class="badge-pill {% if current_user.is_student %}badge-pill--blue{% else %}badge-pill--green{% endif %}">{{ current_user.role.value | title }}</span></td>
+          </tr>
+          <tr>
+            <th>Department</th>
+            <td>
+              {% if current_user.is_student and current_user.student_profile %}
+                {{ current_user.student_profile.department.name }}
+              {% elif current_user.is_teacher and current_user.teacher_profile %}
+                {{ current_user.teacher_profile.department.name }}
+              {% else %}
+                Computer Science & Engineering
+              {% endif %}
+            </td>
+          </tr>
+
+          {% if current_user.is_student and current_user.student_profile %}
+            <tr>
+              <th>Semester & Division</th>
+              <td>Semester {{ current_user.student_profile.semester }} (Division {{ current_user.student_profile.division }})</td>
+            </tr>
+            <tr>
+              <th>Roll Number</th>
+              <td>{{ current_user.student_profile.roll_number }}</td>
+            </tr>
+            <tr>
+              <th>Registered Phone</th>
+              <td>{{ current_user.student_profile.phone or '—' }}</td>
+            </tr>
+            <tr>
+              <th>Address</th>
+              <td>{{ current_user.student_profile.address or '—' }}</td>
+            </tr>
+          {% elif current_user.is_teacher and current_user.teacher_profile %}
+            <tr>
+              <th>Academic Designation</th>
+              <td>{{ current_user.teacher_profile.designation or 'Assistant Professor' }}</td>
+            </tr>
+            <tr>
+              <th>Registered Phone</th>
+              <td>{{ current_user.teacher_profile.phone or '—' }}</td>
+            </tr>
+            <tr>
+              <th>Subjects Handled</th>
+              <td>
+                {% if current_user.teacher_profile.subjects %}
+                  {% for s in current_user.teacher_profile.subjects %}
+                    <span class="badge-pill badge-pill--blue" style="margin-right: 0.35rem;">{{ s.code }} - {{ s.name }}</span>
+                  {% endfor %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

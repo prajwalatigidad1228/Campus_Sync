@@ -1,0 +1,681 @@
+{% extends "app_layout.html" %}
+{% block title %}Academics{% endblock %}
+
+{% block app_content %}
+<div class="module-container">
+
+  <div class="module-header">
+    <div class="module-title-wrap">
+      <h1 class="module-title">Academics Portal 📚</h1>
+      <p class="module-subtitle">Course curriculum, attendance tracking, coursework assignments, and online evaluations.</p>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs-nav">
+    <button type="button" class="tab-btn active" data-tab="tab-syllabus">📖 Syllabus</button>
+    <button type="button" class="tab-btn" data-tab="tab-attendance">📋 Attendance</button>
+    <button type="button" class="tab-btn" data-tab="tab-assignments">📝 Assignments</button>
+    <button type="button" class="tab-btn" data-tab="tab-tests">🧪 Online Tests</button>
+    {% if not is_student %}
+      <button type="button" class="tab-btn" data-tab="tab-targets">🎯 Targets</button>
+    {% endif %}
+  </div>
+
+  <!-- ── Tab 1: Syllabus ──────────────────────────────────────────────────── -->
+  <div class="tab-pane active" id="tab-syllabus">
+    <div class="content-card">
+      <div class="card-title-bar">
+        <h3 class="card-heading">Curriculum Units & Course Syllabi</h3>
+        <span class="badge-pill badge-pill--green">Academic Year 2025–26</span>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Unit #</th>
+              <th>Unit Title & Topics</th>
+              <th>Hours</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for unit in syllabi %}
+              <tr>
+                <td><strong>{{ unit.subject.code }}</strong><br><small style="color: var(--text-muted);">{{ unit.subject.name }}</small></td>
+                <td>Unit {{ unit.unit_number }}</td>
+                <td>
+                  <strong>{{ unit.unit_title }}</strong>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0;">{{ unit.topics }}</p>
+                </td>
+                <td>{{ unit.hours_allocated }} hrs</td>
+                <td>
+                  <span class="badge-pill {% if unit.completion_status == 'Completed' %}badge-pill--green{% elif unit.completion_status == 'In Progress' %}badge-pill--yellow{% else %}badge-pill--blue{% endif %}">
+                    {{ unit.completion_status }}
+                  </span>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No syllabus units registered for this semester.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab 2: Attendance ────────────────────────────────────────────────── -->
+  <div class="tab-pane" id="tab-attendance">
+    {% if is_student %}
+      <!-- Student View: Subject-wise Summary + History -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        {% for s in subjects %}
+          {% set stats = subj_attendance.get(s.id, {'total': 0, 'present': 0, 'pct': 100.0}) %}
+          <div class="content-card" style="padding: 1rem; margin-bottom: 0;">
+            <p style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); margin: 0;">{{ s.code }}</p>
+            <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0.25rem 0;">{{ s.name }}</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">{{ stats.present }} / {{ stats.total }} lectures</span>
+              <span class="badge-pill {% if stats.pct >= 75 %}badge-pill--green{% else %}badge-pill--yellow{% endif %}">
+                {{ stats.pct }}%
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Classroom Attendance Log</h3>
+          <span class="badge-pill badge-pill--blue">{{ attendances|length }} Sessions</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Teacher</th>
+                <th>Status</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for att in attendances %}
+                <tr>
+                  <td>{{ att.date.strftime('%d %b %Y') if att.date else '' }}</td>
+                  <td><strong>{{ att.subject.code }}</strong> – {{ att.subject.name }}</td>
+                  <td>{{ att.teacher.name if att.teacher else 'Faculty' }}</td>
+                  <td>
+                    <span class="badge-pill {% if att.status == 'Present' %}badge-pill--green{% elif att.status == 'Absent' %}badge-pill--yellow{% else %}badge-pill--blue{% endif %}">
+                      {{ att.status }}
+                    </span>
+                  </td>
+                  <td>{{ att.remarks or 'Regular session' }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No attendance records found yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {% else %}
+      <!-- Teacher View: Attendance Marking Form -->
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Mark Classroom Attendance 📋</h3>
+          <span class="badge-pill badge-pill--green">Authorized Faculty</span>
+        </div>
+
+        <form action="{{ url_for('college_api.mark_attendance') }}" method="POST">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Subject</label>
+              <select name="subject_id" class="input-field" required style="width: 100%;">
+                {% for s in subjects %}
+                  <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Session Date</label>
+              <input type="date" name="date" class="input-field" required style="width: 100%;" value="{{ date_today or '2026-10-06' }}">
+            </div>
+          </div>
+
+          <div class="data-table-wrap" style="margin-bottom: 1.25rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Student Name</th>
+                  <th>Attendance Status</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for stu in students %}
+                  <tr>
+                    <td><strong>{{ stu.roll_number }}</strong></td>
+                    <td>{{ stu.name }} ({{ stu.student_id }})</td>
+                    <td>
+                      <input type="hidden" name="records-{{ loop.index0 }}-student_id" value="{{ stu.id }}">
+                      <!-- Simplified radio or select for form post -->
+                      <select name="status" class="input-field" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                        <option value="Present" selected>Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="Excused">Excused</option>
+                      </select>
+                      <input type="hidden" name="student_id" value="{{ stu.id }}">
+                    </td>
+                    <td>
+                      <input type="text" name="remarks" placeholder="Optional notes" class="input-field" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-primary">Save Attendance Session</button>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Tab 3: Assignments ───────────────────────────────────────────────── -->
+  <div class="tab-pane" id="tab-assignments">
+    {% if is_student %}
+      <!-- Student View: View & Submit Coursework -->
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Coursework & Assignments 📝</h3>
+          <span class="badge-pill badge-pill--blue">{{ assignments|length }} Total</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Assignment Title</th>
+                <th>Due Date</th>
+                <th>Max Marks</th>
+                <th>Your Status</th>
+                <th>Grade / Score</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in assignments %}
+                {% set sub = submissions_map.get(a.id) %}
+                <tr>
+                  <td><strong>{{ a.subject.code }}</strong></td>
+                  <td>
+                    <strong>{{ a.title }}</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0;">{{ a.description }}</p>
+                  </td>
+                  <td>{{ a.due_date.strftime('%d %b %Y, %I:%M %p') if a.due_date else 'TBA' }}</td>
+                  <td>{{ a.max_marks }} pts</td>
+                  <td>
+                    {% if sub %}
+                      <span class="badge-pill {% if sub.status == 'Graded' %}badge-pill--green{% elif sub.status == 'Late' %}badge-pill--yellow{% else %}badge-pill--blue{% endif %}">
+                        {{ sub.status }}
+                      </span>
+                    {% else %}
+                      <span class="badge-pill badge-pill--yellow">Pending</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if sub and sub.marks_obtained is not none %}
+                      <strong style="color: #10b981;">{{ sub.marks_obtained }} / {{ a.max_marks }}</strong>
+                      {% if sub.feedback %}<br><small style="color: var(--text-muted);">{{ sub.feedback }}</small>{% endif %}
+                    {% else %}
+                      <span style="color: var(--text-muted);">--</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <button type="button" class="btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;"
+                            onclick="openSubmitModal({{ a.id }}, '{{ a.title|escape }}')">
+                      {{ 'Resubmit' if sub else 'Submit' }}
+                    </button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No assignments currently assigned.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Submit Assignment Modal -->
+      <div id="submit-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; padding: 1.5rem;">
+        <div class="content-card" style="max-width: 550px; width: 100%;">
+          <div class="card-title-bar" style="margin-bottom: 1rem;">
+            <h3 class="card-heading" id="modal-assign-title">Submit Coursework</h3>
+            <button type="button" onclick="document.getElementById('submit-modal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+          </div>
+          <form id="submit-assign-form" method="POST">
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Submission Text / Solution Link</label>
+              <textarea name="submission_text" rows="4" class="input-field" placeholder="Paste your answers, summary, or GitHub/Drive link here..." required style="width: 100%;"></textarea>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Attachment URL (optional)</label>
+              <input type="url" name="attachment_url" class="input-field" placeholder="https://..." style="width: 100%;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" class="btn-secondary" onclick="document.getElementById('submit-modal').style.display='none'">Cancel</button>
+              <button type="submit" class="btn-primary">Confirm Submission</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        function openSubmitModal(assignId, title) {
+          document.getElementById('modal-assign-title').innerText = 'Submit: ' + title;
+          document.getElementById('submit-assign-form').action = '/api/assignments/' + assignId + '/submit';
+          document.getElementById('submit-modal').style.display = 'flex';
+        }
+      </script>
+
+    {% else %}
+      <!-- Teacher View: Create Assignment & Grade Submissions -->
+      <div class="content-card" style="margin-bottom: 1.5rem;">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Create New Assignment ➕</h3>
+        </div>
+        <form action="{{ url_for('college_api.create_assignment') }}" method="POST">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Subject</label>
+              <select name="subject_id" class="input-field" required style="width: 100%;">
+                {% for s in subjects %}
+                  <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Assignment Title</label>
+              <input type="text" name="title" class="input-field" placeholder="e.g. Unit 3 Programming Exercise" required style="width: 100%;">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Submission Deadline</label>
+              <input type="datetime-local" name="due_date" class="input-field" required style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Max Marks</label>
+              <input type="number" name="max_marks" value="100" class="input-field" required style="width: 100%;">
+            </div>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Description / Instructions</label>
+            <textarea name="description" rows="2" class="input-field" placeholder="Details and instructions..." style="width: 100%;"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-primary">Publish Assignment</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Grading Submissions Table -->
+      <div class="content-card" id="tab-grading">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Student Submissions & Grading 📑</h3>
+          <span class="badge-pill badge-pill--yellow">{{ submissions|length }} Submissions</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Assignment</th>
+                <th>Submitted Solution</th>
+                <th>Current Status</th>
+                <th>Grade & Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sub in submissions %}
+                <tr>
+                  <td><strong>{{ sub.student.name }}</strong><br><small style="color: var(--text-muted);">{{ sub.student.roll_number }}</small></td>
+                  <td><strong>{{ sub.assignment.title }}</strong><br><small style="color: var(--text-muted);">Max: {{ sub.assignment.max_marks }}</small></td>
+                  <td>
+                    <p style="font-size: 0.82rem; margin: 0;">{{ sub.submission_text }}</p>
+                    {% if sub.attachment_url %}
+                      <a href="{{ sub.attachment_url }}" target="_blank" style="font-size: 0.78rem; color: #10b981;">View Attachment ↗</a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge-pill {% if sub.status == 'Graded' %}badge-pill--green{% else %}badge-pill--yellow{% endif %}">
+                      {{ sub.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <form action="{{ url_for('college_api.grade_submission', submission_id=sub.id) }}" method="POST" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+                      <input type="number" step="0.5" max="{{ sub.assignment.max_marks }}" name="marks_obtained" value="{{ sub.marks_obtained if sub.marks_obtained is not none else '' }}" placeholder="Marks" class="input-field" style="width: 80px; padding: 0.3rem 0.5rem;" required>
+                      <input type="text" name="feedback" value="{{ sub.feedback or '' }}" placeholder="Feedback" class="input-field" style="width: 140px; padding: 0.3rem 0.5rem;">
+                      <button type="submit" class="btn-primary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No submissions pending assessment.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Tab 4: Online Tests ──────────────────────────────────────────────── -->
+  <div class="tab-pane" id="tab-tests">
+    {% if is_student %}
+      <!-- Student View: Available Tests -->
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Scheduled Online Tests & Quizzes 🧪</h3>
+          <span class="badge-pill badge-pill--blue">{{ tests|length }} Tests</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Test Title</th>
+                <th>Duration</th>
+                <th>Total Marks</th>
+                <th>Passing</th>
+                <th>Your Score</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in tests %}
+                {% set att = attempts_map.get(t.id) %}
+                <tr>
+                  <td><strong>{{ t.subject.code }}</strong></td>
+                  <td>
+                    <strong>{{ t.title }}</strong>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0;">{{ t.description }}</p>
+                  </td>
+                  <td>{{ t.duration_minutes }} mins</td>
+                  <td>{{ t.total_marks }} pts</td>
+                  <td>{{ t.passing_marks }} pts</td>
+                  <td>
+                    {% if att and att.status == 'submitted' %}
+                      <strong style="color: {% if att.score >= t.passing_marks %}#10b981{% else %}#ef4444{% endif %};">
+                        {{ att.score }} / {{ att.total_marks }} ({{ att.percentage }}%)
+                      </strong>
+                    {% elif att %}
+                      <span class="badge-pill badge-pill--yellow">In Progress</span>
+                    {% else %}
+                      <span style="color: var(--text-muted);">Not Attempted</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if att and att.status == 'submitted' %}
+                      <span class="badge-pill badge-pill--green">Completed</span>
+                    {% else %}
+                      <form action="{{ url_for('college_api.start_test', test_id=t.id) }}" method="POST" style="margin: 0;">
+                        <button type="submit" class="btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+                          {{ 'Resume Test' if att else 'Start Test ▶' }}
+                        </button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No online tests scheduled at this time.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {% else %}
+      <!-- Teacher View: Create Test & Add Questions -->
+      <div class="content-card" style="margin-bottom: 1.5rem;">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Create Online Test 🧪</h3>
+        </div>
+        <form action="{{ url_for('college_api.create_test') }}" method="POST">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Subject</label>
+              <select name="subject_id" class="input-field" required style="width: 100%;">
+                {% for s in subjects %}
+                  <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Test Title</label>
+              <input type="text" name="title" class="input-field" placeholder="e.g. CS301 Unit 2 MCQ Assessment" required style="width: 100%;">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Duration (Minutes)</label>
+              <input type="number" name="duration_minutes" value="30" class="input-field" required style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Total Marks</label>
+              <input type="number" name="total_marks" value="20" class="input-field" required style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Passing Marks</label>
+              <input type="number" name="passing_marks" value="8" class="input-field" required style="width: 100%;">
+            </div>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Description</label>
+            <textarea name="description" rows="2" class="input-field" placeholder="Quiz rules and coverage..." style="width: 100%;"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-primary">Create Test</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tests List with Add Questions -->
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Active Online Tests</h3>
+          <span class="badge-pill badge-pill--blue">{{ tests|length }} Tests Created</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Title</th>
+                <th>Duration</th>
+                <th>Questions</th>
+                <th>Submissions</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in tests %}
+                <tr>
+                  <td><strong>{{ t.subject.code }}</strong></td>
+                  <td><strong>{{ t.title }}</strong></td>
+                  <td>{{ t.duration_minutes }} mins</td>
+                  <td>{{ t.questions.count() }} Questions</td>
+                  <td>{{ t.attempts.count() }} Attempts</td>
+                  <td>
+                    <button type="button" class="btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;"
+                            onclick="openQuestionModal({{ t.id }}, '{{ t.title|escape }}')">
+                      + Add Question
+                    </button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No tests created yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add Question Modal -->
+      <div id="question-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; padding: 1.5rem;">
+        <div class="content-card" style="max-width: 600px; width: 100%;">
+          <div class="card-title-bar" style="margin-bottom: 1rem;">
+            <h3 class="card-heading" id="modal-q-title">Add MCQ Question</h3>
+            <button type="button" onclick="document.getElementById('question-modal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+          </div>
+          <form id="add-q-form" method="POST">
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Question Text</label>
+              <textarea name="question_text" rows="2" class="input-field" placeholder="Enter problem statement..." required style="width: 100%;"></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Option A</label>
+                <input type="text" name="option_a" class="input-field" required style="width: 100%;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Option B</label>
+                <input type="text" name="option_b" class="input-field" required style="width: 100%;">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Option C</label>
+                <input type="text" name="option_c" class="input-field" style="width: 100%;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Option D</label>
+                <input type="text" name="option_d" class="input-field" style="width: 100%;">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Correct Answer</label>
+                <select name="correct_option" class="input-field" style="width: 100%;">
+                  <option value="A">Option A</option>
+                  <option value="B">Option B</option>
+                  <option value="C">Option C</option>
+                  <option value="D">Option D</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600;">Marks</label>
+                <input type="number" step="0.5" name="marks" value="1.0" class="input-field" style="width: 100%;">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" class="btn-secondary" onclick="document.getElementById('question-modal').style.display='none'">Cancel</button>
+              <button type="submit" class="btn-primary">Add Question</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        function openQuestionModal(testId, title) {
+          document.getElementById('modal-q-title').innerText = 'Add Question: ' + title;
+          document.getElementById('add-q-form').action = '/api/tests/' + testId + '/questions';
+          document.getElementById('question-modal').style.display = 'flex';
+        }
+      </script>
+    {% endif %}
+  </div>
+
+  <!-- ── Tab 5: Targets (Teacher Only) ────────────────────────────────────── -->
+  {% if not is_student %}
+    <div class="tab-pane" id="tab-targets">
+      <div class="content-card">
+        <div class="card-title-bar">
+          <h3 class="card-heading">Syllabus Delivery & Teaching Targets 🎯</h3>
+          <span class="badge-pill badge-pill--green">{{ targets|length }} Active Targets</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Target Milestone</th>
+                <th>Lectures Completed</th>
+                <th>Progress Bar</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tg in targets %}
+                <tr>
+                  <td><strong>{{ tg.subject.code }}</strong></td>
+                  <td><strong>{{ tg.target_title }}</strong></td>
+                  <td>{{ tg.completed_lectures }} / {{ tg.planned_lectures }} hours</td>
+                  <td style="width: 180px;">
+                    <div style="background: var(--bg-accent-subtle); border-radius: 999px; height: 10px; overflow: hidden; border: 1px solid var(--border-color);">
+                      <div style="background: #10b981; height: 100%; width: {{ tg.progress_percentage }}%;"></div>
+                    </div>
+                    <small style="color: var(--text-muted); font-size: 0.75rem;">{{ tg.progress_percentage }}% complete</small>
+                  </td>
+                  <td>
+                    <span class="badge-pill {% if tg.status == 'Completed' %}badge-pill--green{% elif tg.status == 'Behind' %}badge-pill--yellow{% else %}badge-pill--blue{% endif %}">
+                      {{ tg.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <form action="{{ url_for('college_api.update_target') }}" method="POST" style="display: flex; gap: 0.35rem; align-items: center; margin: 0;">
+                      <input type="hidden" name="target_id" value="{{ tg.id }}">
+                      <input type="number" name="completed_lectures" value="{{ tg.completed_lectures }}" class="input-field" style="width: 70px; padding: 0.25rem 0.4rem; font-size: 0.8rem;">
+                      <button type="submit" class="btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.78rem;">Update</button>
+                    </form>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No active targets recorded.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Hash-based tab switching script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash) {
+      var hashTab = window.location.hash.substring(1);
+      var btn = document.querySelector('.tab-btn[data-tab="' + hashTab + '"]');
+      if (btn) {
+        btn.click();
+      }
+    }
+  });
+</script>
+{% endblock %}

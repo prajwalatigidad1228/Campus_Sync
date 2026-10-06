@@ -1,0 +1,96 @@
+{% extends "app_layout.html" %}
+{% block title %}Take Test – {{ test.title }}{% endblock %}
+
+{% block app_content %}
+<div class="module-container" style="max-width: 900px; margin: 0 auto;">
+
+  <!-- Header Card with Countdown Timer -->
+  <div class="content-card" style="margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: gap;">
+      <div>
+        <span class="badge-pill badge-pill--blue">{{ test.subject.code }} &bull; {{ test.subject.name }}</span>
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">{{ test.title }}</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">{{ test.description }}</p>
+      </div>
+      <div style="text-align: right; background: var(--bg-accent-subtle); padding: 0.75rem 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <small style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700;">Time Remaining</small>
+        <span id="countdown-timer" style="font-size: 1.6rem; font-weight: 800; color: #10b981; font-family: monospace;">{{ test.duration_minutes }}:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Form -->
+  <form id="online-test-form" action="{{ url_for('college_api.submit_test', test_id=test.id) }}" method="POST">
+    
+    {% for q in questions %}
+      <div class="content-card" style="margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-color); margin: 0;">
+            Question {{ loop.index }}: {{ q.question_text }}
+          </h3>
+          <span class="badge-pill badge-pill--blue">{{ q.marks }} mark{{ 's' if q.marks != 1 else '' }}</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-top: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; transition: all 0.2s;">
+            <input type="radio" name="question_{{ q.id }}" value="A" required>
+            <span><strong>A.</strong> {{ q.option_a }}</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; transition: all 0.2s;">
+            <input type="radio" name="question_{{ q.id }}" value="B">
+            <span><strong>B.</strong> {{ q.option_b }}</span>
+          </label>
+          {% if q.option_c %}
+            <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="question_{{ q.id }}" value="C">
+              <span><strong>C.</strong> {{ q.option_c }}</span>
+            </label>
+          {% endif %}
+          {% if q.option_d %}
+            <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="question_{{ q.id }}" value="D">
+              <span><strong>D.</strong> {{ q.option_d }}</span>
+            </label>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <!-- Submit Action Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <a href="{{ url_for('dashboard.academics') }}#tab-tests" class="btn-secondary">Cancel & Exit</a>
+      <button type="submit" class="btn-primary" style="padding: 0.6rem 2rem; font-size: 0.95rem; font-weight: 700;">
+        Submit Test Now 🚀
+      </button>
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+  // Countdown Timer
+  var totalSeconds = {{ test.duration_minutes }} * 60;
+  var timerEl = document.getElementById('countdown-timer');
+  var formEl = document.getElementById('online-test-form');
+
+  var interval = setInterval(function() {
+    totalSeconds--;
+    if (totalSeconds <= 0) {
+      clearInterval(interval);
+      timerEl.innerText = "00:00";
+      alert("Time is up! Your answers are being automatically submitted.");
+      formEl.submit();
+      return;
+    }
+
+    var mins = Math.floor(totalSeconds / 60);
+    var secs = totalSeconds % 60;
+    timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+    if (totalSeconds <= 120) {
+      timerEl.style.color = '#ef4444';
+    }
+  }, 1000);
+</script>
+{% endblock %}
